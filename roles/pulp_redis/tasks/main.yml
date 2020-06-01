@@ -29,7 +29,7 @@
 
     - name: Install Redis
       package:
-        name: redis
+        name: "{{ pulp_redis_package_name }}"
         state: present
 
     - name: Start Redis
