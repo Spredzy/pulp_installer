@@ -1,0 +1,35 @@
+---
+- name: Install SELinux necessary packages
+  package:
+    name:
+      - selinux-policy-devel
+      - policycoreutils
+      - make
+  become: true
+
+- name: Retrieve pulp/pulpcore-selinux
+  git:
+    repo: 'https://github.com/pulp/pulpcore-selinux'
+    dest: '/tmp/pulpcore-selinux'
+    force: true
+
+- name: Compile SELinux policies
+  command: '{{ item }}'
+  loop:
+    - make -f /usr/share/selinux/devel/Makefile pulpcore_port.pp
+    - make -f /usr/share/selinux/devel/Makefile pulpcore.pp
+  args:
+    chdir: '/tmp/pulpcore-selinux'
+
+- name: Install SELinux policies
+  command: '{{ item }}'
+  become: true
+  loop:
+    - semodule -i pulpcore_port.pp
+    - semodule -i pulpcore.pp
+  args:
+    chdir: '/tmp/pulpcore-selinux'
+
+- name: Labeling pulpcore_port
+  command: semanage port -a -t pulpcore_port_t -p tcp 24816-24817
+  become: true

@@ -20,6 +20,10 @@
         state: permissive
       when: ansible_os_family == 'RedHat' and pulp_disable_selinux | bool
 
+    - name: Load SELinux policy
+      include_tasks: load_selinux_policy.yml
+      when: ansible_os_family == 'RedHat' and not pulp_disable_selinux | bool
+
     # Become root so as to search paths like /usr/sbin.
     - name: Find the nologin executable
       command: which nologin
